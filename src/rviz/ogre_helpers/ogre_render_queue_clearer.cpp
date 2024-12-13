@@ -31,7 +31,7 @@
 
 #include <OgreRoot.h>
 #include <OgrePass.h>
-#include <SceneManagerEnumerator.h>
+#include <OgreSceneManagerEnumerator.h>
 
 namespace rviz
 {
