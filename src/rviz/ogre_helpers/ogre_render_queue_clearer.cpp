@@ -57,7 +57,7 @@ bool OgreRenderQueueClearer::frameStarted(const Ogre::FrameEvent& /*evt*/)
     // This workaround is only necessary if there is more than one
     // scene manager present, so check for that
     Ogre::Root* root = Ogre::Root::getSingletonPtr();
-    auto sceneManagers = root->getSceneManagers();
+    auto& sceneManagers = root->getSceneManagers();  // Get the container of SceneManagers
 
     // Only proceed if there is more than one scene manager
     if (sceneManagers.size() <= 1)
@@ -65,9 +65,10 @@ bool OgreRenderQueueClearer::frameStarted(const Ogre::FrameEvent& /*evt*/)
         return true;
     }
 
-    // Clear render queues for all scene managers
-    for (auto* sceneManager : sceneManagers)
+    // Iterate over the scene managers container (likely a map or unordered_map)
+    for (const auto& entry : sceneManagers)
     {
+        Ogre::SceneManager* sceneManager = entry.second;  // Extract the SceneManager pointer
         if (sceneManager)
         {
             sceneManager->getRenderQueue()->clear(true);
