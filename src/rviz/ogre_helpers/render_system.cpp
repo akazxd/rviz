@@ -181,7 +181,8 @@ void RenderSystem::detectGlVersion()
   else
   {
     Ogre::RenderSystem* renderSys = ogre_root_->getRenderSystem();
-    const Ogre::RenderSystemCapabilities* caps = renderSys->createRenderSystemCapabilities();
+    const Ogre::RenderSystemCapabilities* caps = renderSys->getCapabilities();
+
     ROS_INFO("OpenGL device: %s", caps->getDeviceName().c_str());
     int major = caps->getDriverVersion().major;
     int minor = caps->getDriverVersion().minor;
