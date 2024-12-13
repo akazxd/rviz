@@ -594,7 +594,7 @@ void PointCloud::popPoints(uint32_t num_points)
     PointCloudRenderablePtr rend = renderables_.front();
     Ogre::RenderOperation* op = rend->getRenderOperation();
 
-    uint32_t popped = std::min((size_t)(num_points * vpp - popped_count), op->vertexData->vertexCount);
+    uint32_t popped = std::min((size_t)(num_points * vpp - popped_count), static_cast<size_t>(op->vertexData->vertexCount));
     op->vertexData->vertexStart += popped;
     op->vertexData->vertexCount -= popped;
 
