@@ -145,10 +145,17 @@ void QtOgreRenderWindow::preViewportUpdate(const Ogre::RenderTargetViewportEvent
 {
   Ogre::Viewport* viewport = evt.source;
 
-  const Ogre::Vector2& offset = camera_->getFrustumOffset();
-  const Ogre::Vector3 pos = camera_->getPosition();
-  const Ogre::Vector3 right = camera_->getRight();
-  const Ogre::Vector3 up = camera_->getUp();
+  // Use SceneNode for managing camera transformations
+  Ogre::SceneNode* cameraNode = camera_->getParentSceneNode();
+  if (!cameraNode) {
+    // Handle the case if the camera is not attached to a SceneNode
+    ROS_WARN("Camera is not attached to a SceneNode.");
+    return;
+  }
+
+  const Ogre::Vector3& pos = cameraNode->getPosition();
+  const Ogre::Vector3& right = cameraNode->getOrientation() * Ogre::Vector3::UNIT_X;
+  const Ogre::Vector3& up = cameraNode->getOrientation() * Ogre::Vector3::UNIT_Y;
 
   if (viewport == right_viewport_)
   {
@@ -158,11 +165,15 @@ void QtOgreRenderWindow::preViewportUpdate(const Ogre::RenderTargetViewportEvent
       return;
     }
 
+    // Calculate new position for the right camera
     Ogre::Vector3 newpos = pos + right * offset.x + up * offset.y;
 
+    // Synchronize settings and position for the right camera
     right_camera_->synchroniseBaseSettingsWith(camera_);
-    right_camera_->setFrustumOffset(-offset);
     right_camera_->setPosition(newpos);
+    right_camera_->setOrientation(camera_->getOrientation());  // Sync the orientation
+
+    // Set the viewport camera to right_camera_
     viewport->setCamera(right_camera_);
   }
   else if (viewport == viewport_)
@@ -173,11 +184,15 @@ void QtOgreRenderWindow::preViewportUpdate(const Ogre::RenderTargetViewportEvent
       return;
     }
 
+    // Calculate new position for the left camera
     Ogre::Vector3 newpos = pos - right * offset.x - up * offset.y;
 
+    // Synchronize settings and position for the left camera
     left_camera_->synchroniseBaseSettingsWith(camera_);
-    left_camera_->setFrustumOffset(offset);
     left_camera_->setPosition(newpos);
+    left_camera_->setOrientation(camera_->getOrientation());  // Sync the orientation
+
+    // Set the viewport camera to left_camera_
     viewport->setCamera(left_camera_);
   }
   else
@@ -185,6 +200,7 @@ void QtOgreRenderWindow::preViewportUpdate(const Ogre::RenderTargetViewportEvent
     ROS_WARN("Begin rendering to unknown viewport.");
   }
 }
+
 
 void QtOgreRenderWindow::postViewportUpdate(const Ogre::RenderTargetViewportEvent& evt)
 {
